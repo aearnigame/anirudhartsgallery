@@ -1,0 +1,1166 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANIRUDH ARTS GALLERY – Custom Portraits | Paintings | Handmade Art</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Roboto', sans-serif;
+    }
+
+    body {
+        background-color: #F5F5F5;
+        color: #333;
+    }
+
+    .announcement {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        background-color: #E0E0E0;
+        color: #333;
+        text-align: center;
+        padding: 10px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 16px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        z-index: 1000;
+        overflow: hidden;
+    }
+
+    .announcement .message {
+        display: inline-block;
+        transition: transform 0.5s ease;
+    }
+
+    .navbar {
+        background-color: #F5F5F5;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        margin-top: 40px;
+    }
+
+    .navbar .nav-links a {
+        color: #333;
+        text-decoration: none;
+        font-family: 'Poppins', sans-serif;
+        font-size: 18px;
+        margin: 0 15px;
+        transition: color 0.3s, transform 0.3s;
+    }
+
+    .navbar .nav-links a:hover {
+        color: #666;
+        transform: translateY(-2px);
+    }
+
+    .navbar .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .navbar .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #FAFAFA;
+        min-width: 200px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        z-index: 1;
+        border-radius: 10px;
+    }
+
+    .navbar .dropdown-content a {
+        color: #333;
+        padding: 12px 16px;
+        display: block;
+        font-size: 16px;
+    }
+
+    .navbar .dropdown-content a:hover {
+        background-color: #E0E0E0;
+        color: #333;
+    }
+
+    .navbar .dropdown:hover .dropdown-content {
+        display: block;
+    }
+
+    .navbar .search-bar {
+        display: flex;
+        align-items: center;
+    }
+
+    .navbar .search-bar input {
+        padding: 8px;
+        border: 1px solid #E0E0E0;
+        border-radius: 20px 0 0 20px;
+        font-size: 16px;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+
+    .navbar .search-bar input:focus {
+        border-color: #666;
+    }
+
+    .navbar .search-bar button {
+        background-color: #E0E0E0;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 0 20px 20px 0;
+        cursor: pointer;
+        color: #333;
+        transition: background-color 0.3s;
+    }
+
+    .navbar .search-bar button:hover {
+        background-color: #D0D0D0;
+    }
+
+    .navbar .icons {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .navbar .icons a, .navbar .icons button {
+        color: #333;
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: color 0.3s, transform 0.3s;
+    }
+
+    .navbar .icons a:hover, .navbar .icons button:hover {
+        color: #666;
+        transform: scale(1.1);
+    }
+
+    .navbar .icons svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 80px auto 20px;
+        padding: 0 20px;
+    }
+
+    .homepage-content {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .homepage-content h1 {
+        font-family: 'Poppins', sans-serif;
+        font-size: 36px;
+        color: #333;
+        margin-bottom: 20px;
+        animation: fadeIn 1s ease;
+    }
+
+    .homepage-content p {
+        font-size: 18px;
+        line-height: 28px;
+        color: #333;
+        animation: fadeIn 1.2s ease;
+    }
+
+    .products {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .product {
+        background-color: #FAFAFA;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .product:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    }
+
+    .product img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        transition: transform 0.3s;
+    }
+
+    .product:hover img {
+        transform: scale(1.05);
+    }
+
+    .product-info {
+        padding: 15px;
+        text-align: center;
+    }
+
+    .product-info h3 {
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.2em;
+        margin-bottom: 10px;
+        color: #333;
+    }
+
+    .product-info p.description {
+        font-size: 0.9em;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .product-info p.price {
+        font-size: 1.1em;
+        color: #FAFAFA;
+        background-color: #666;
+        padding: 5px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+
+    .product-info button {
+        background: linear-gradient(90deg, #E0E0E0, #F5F5F5);
+        color: #333;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 25px;
+        cursor: pointer;
+        font-family: 'Poppins', sans-serif;
+        font-size: 1em;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .product-info button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .popup {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.8);
+        width: 80%;
+        max-width: 800px;
+        max-height: 80%;
+        overflow-y: auto;
+        background: linear-gradient(145deg, #FAFAFA, #E0E0E0);
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .popup.active {
+        display: block;
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    .popup .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: none;
+        border: none;
+        font-size: 20px;
+        color: #333;
+        cursor: pointer;
+        transition: transform 0.3s;
+    }
+
+    .popup .close-btn:hover {
+        transform: rotate(360deg);
+    }
+
+    .popup h2 {
+        font-family: 'Poppins', sans-serif;
+        font-size: 2em;
+        margin-bottom: 10px;
+        color: #333;
+        text-align: center;
+    }
+
+    .progress-indicator {
+        font-family: 'Roboto', sans-serif;
+        font-size: 0.9em;
+        color: #333;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .checkout-item {
+        background-color: #FAFAFA;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-family: 'Roboto', sans-serif;
+        font-size: 1.1em;
+        color: #333;
+        text-align: center;
+    }
+
+    .payment-methods {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .payment-option {
+        background-color: #FAFAFA;
+        padding: 20px;
+        border-radius: 10px;
+        border: 1px solid #E0E0E0;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        opacity: 0;
+        transform: translateY(20px);
+        animation: slideIn 0.5s forwards;
+    }
+
+    .payment-option:nth-child(1) { animation-delay: 0.2s; }
+    .payment-option:nth-child(2) { animation-delay: 0.4s; }
+
+    @keyframes slideIn {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .payment-option h3 {
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.3em;
+        margin-bottom: 10px;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .payment-option h3::before {
+        content: '';
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+        background-size: cover;
+    }
+
+    .payment-option.online h3::before {
+        background-image: url('https://img.icons8.com/color/24/credit-card.png');
+    }
+
+    .payment-option.cod h3::before {
+        background-image: url('https://img.icons8.com/color/24/cash-on-delivery.png');
+    }
+
+    .payment-option p {
+        font-family: 'Roboto', sans-serif;
+        font-size: 1em;
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    .terms-section, .terms-content {
+        margin-top: 25px;
+        font-family: 'Roboto', sans-serif;
+        font-size: 0.9em;
+        color: #333;
+        text-align: left;
+    }
+
+    .terms-section a, .terms-content a {
+        color: #666;
+        text-decoration: none;
+    }
+
+    .terms-section a:hover, .terms-content a:hover {
+        text-decoration: underline;
+    }
+
+    .terms-content h3 {
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.2em;
+        margin: 15px 0 10px;
+    }
+
+    .terms-content p {
+        margin-bottom: 10px;
+    }
+
+    .blur-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        z-index: 999;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        animation: blurIn 0.3s ease;
+    }
+
+    .blur-overlay.active {
+        display: block;
+        opacity: 1;
+    }
+
+    @keyframes blurIn {
+        from { backdrop-filter: blur(0); }
+        to { backdrop-filter: blur(5px); }
+    }
+
+    .footer {
+        background-color: #E0E0E0;
+        color: #333;
+        text-align: center;
+        padding: 10px;
+        margin-top: 20px;
+        font-family: 'Roboto', sans-serif;
+        font-size: 0.9em;
+    }
+
+    .footer a {
+        color: #333;
+        text-decoration: underline;
+        margin: 0 5px;
+    }
+
+    .footer a:hover {
+        color: #666;
+    }
+
+    .signup-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(90deg, #E0E0E0, #F5F5F5);
+        color: #333;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        font-family: 'Poppins', sans-serif;
+        font-size: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        transition: transform 0.3s;
+        z-index: 998;
+    }
+
+    .signup-button:hover {
+        transform: scale(1.1);
+    }
+
+    .signup-popup {
+        max-width: 500px;
+    }
+
+    .signup-popup form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .signup-popup input {
+        padding: 10px;
+        border: 1px solid #E0E0E0;
+        border-radius: 5px;
+        font-family: 'Roboto', sans-serif;
+        font-size: 1em;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+
+    .signup-popup input:focus {
+        border-color: #666;
+    }
+
+    .signup-popup button {
+        background: linear-gradient(90deg, #E0E0E0, #F5F5F5);
+        color: #333;
+        border: none;
+        padding: 12px;
+        border-radius: 25px;
+        cursor: pointer;
+        font-family: 'Poppins', sans-serif;
+        font-size: 1em;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .signup-popup button:hover {
+        transform: scale(1.03);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .fake-popup {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        background: linear-gradient(145deg, #FAFAFA, #E0E0E0);
+        padding: 15px;
+        border-radius: 17%;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        font-family: 'Roboto', sans-serif;
+        font-size: 14px;
+        color: #333;
+        z-index: 998;
+        animation: slideUp 0.5s ease, fadeOut 5s ease 3s forwards;
+    }
+
+    @keyframes slideUp {
+        from { transform: translateY(100px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes fadeOut {
+        to { opacity: 0; transform: translateY(20px); }
+    }
+
+    .action-note {
+        margin: 40px 0;
+        text-align: center;
+        font-family: 'Roboto', sans-serif;
+        font-size: 16px;
+        color: #333;
+        background-color: #FAFAFA;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        animation: fadeIn 1s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @media (max-width: 600px) {
+        .products {
+            grid-template-columns: 1fr;
+        }
+
+        .navbar {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .navbar .nav-links a {
+            margin: 0 10px;
+            font-size: 16px;
+        }
+
+        .container {
+            margin-top: 100px;
+        }
+
+        .homepage-content h1 {
+            font-size: 28px;
+        }
+
+        .homepage-content p {
+            font-size: 16px;
+        }
+
+        .popup {
+            width: 90%;
+            padding: 20px;
+        }
+
+        .popup h2 {
+            font-size: 1.5em;
+        }
+
+        .fake-popup {
+            font-size: 12px;
+            padding: 10px;
+        }
+    }
+</style>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+<div class="announcement">
+    <span class="message">Free Shipping All Over India | Cash On Delivery</span>
+</div>
+<div class="navbar">
+    <div class="icons">
+        <a href="#" onclick="showCart(event)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-shopping-bag">
+                <path d="M6 2l1.5 4H16.5L18 2"/>
+                <path d="M3 6h18l-1.5 14h-15L3 6z"/>
+                <path d="M9 10v4"/>
+                <path d="M15 10v4"/>
+            </svg>
+        </a>
+    </div>
+    <div class="nav-links">
+        <a href="#" onclick="showCategory('home', event)">Home</a>
+        <a href="#" onclick="showCategory('sketches', event)">Sketches</a>
+        <a href="#" onclick="showCategory('paintings', event)">Paintings</a>
+        <a href="#" onclick="showCategory('sculptures', event)">Sculptures</a>
+        <div class="dropdown">
+            <a href="#" onclick="showCategory('customize', event)">Customize</a>
+            <div class="dropdown-content">
+                <a href="#" onclick="showSubcategory('accessories', event)">Accessories</a>
+                <a href="#" onclick="showSubcategory('shoes', event)">Shoes</a>
+                <a href="#" onclick="showSubcategory('shirts', event)">Shirts</a>
+                <a href="#" onclick="showSubcategory('phone-covers', event)">Phone Covers</a>
+                <a href="#" onclick="showSubcategory('skins', event)">Skins</a>
+                <a href="#" onclick="showSubcategory('bags', event)">Bags</a>
+                <a href="#" onclick="showSubcategory('kitchen-items', event)">Kitchen Items</a>
+                <a href="#" onclick="showSubcategory('water-bottles', event)">Water Bottles</a>
+            </div>
+        </div>
+    </div>
+    <div class="search-bar">
+        <input type="text" id="search-input" placeholder="Search artworks..." oninput="searchProducts()">
+        <button><i class="fa-brands fa-searchengin"></i></button>
+    </div>
+</div>
+
+<button class="signup-button" onclick="showSignup()">+</button>
+
+<div class="container">
+    <div class="homepage-content" id="home-content">
+        <h1>ANIRUDH ARTS GALLERY</h1>
+        <p>Your go-to destination for custom portrait sketches, stunning handmade paintings, and personalized artwork! 🎨<br>
+            ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ
+            ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ</p>
+        <div class="products" id="home-products"></div>
+        <div class="action-note">
+            <strong>📩 Action Required After Payment</strong><br>
+            After selecting your artwork and completing the payment on our website, please send:<br>
+            ✅ Payment Screenshot<br>
+            ✅ Target Photo for Custom Art<br>
+            Send via WhatsApp to <a href="tel:+919860730275">+91 9860730275</a> or email to <a href="mailto:aearnigame@gmail.com">aearnigame@gmail.com</a>
+        </div>
+    </div>
+    <div class="products" id="products"></div>
+
+    <div class="blur-overlay" id="blur-overlay"></div>
+    <div class="popup checkout-popup" id="checkout-popup">
+        <button class="close-btn" onclick="closeCheckout()">✖</button>
+        <h2>Complete Your Purchase</h2>
+        <div class="progress-indicator">Step 1: Confirm Order</div>
+        <div class="checkout-item" id="checkout-item"></div>
+        <div class="payment-methods">
+            <div class="payment-option online">
+                <style>
+                    .payment-button {
+                        display: inline-block;
+                        padding: 12px 24px;
+                        background: linear-gradient(90deg, #E0E0E0, #F5F5F5);
+                        color: #333;
+                        text-align: center;
+                        text-decoration: none;
+                        font-family: 'Poppins', sans-serif;
+                        font-size: 16px;
+                        font-weight: bold;
+                        border-radius: 25px;
+                        border: none;
+                        cursor: pointer;
+                        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+                        transition: all 0.3s ease;
+                    }
+
+                    .payment-button:hover {
+                        transform: scale(1.05);
+                        box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+                    }
+                </style>
+                <a href="https://superprofile.bio/vp/online-payment--order-sketch" class="payment-button">ONLINE PAYMENT</a>
+            </div>
+            <div class="payment-option cod">
+                <style>
+                    .payment-button {
+                        display: inline-block;
+                        padding: 12px 24px;
+                        background: linear-gradient(90deg, #E0E0E0, #F5F5F5);
+                        color: #333;
+                        text-align: center;
+                        text-decoration: none;
+                        font-family: 'Poppins', sans-serif;
+                        font-size: 16px;
+                        font-weight: bold;
+                        border-radius: 25px;
+                        border: none;
+                        cursor: pointer;
+                        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+                        transition: all 0.3s ease;
+                    }
+
+                    .payment-button:hover {
+                        transform: scale(1.05);
+                        box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+                    }
+                </style>
+                <a href="https://superprofile.bio/vp/100advancepaysketch" class="payment-button">100 ADVANCE PAYMENT</a>
+            </div>
+        </div>
+        <div class="terms-section">
+            <p>🔒 Secure payments powered by Razorpay (PCI-DSS compliant).</p>
+            <p>📞 24/7 Support: <a href="mailto:aearnigame@gmail.com">aearnigame@gmail.com</a></p>
+            <p>🔄 <strong>Terms and Conditions:</strong> Custom orders are non-refundable unless defective. Refunds for defective artwork within 7 days. Delivery timelines for custom pieces may vary (7-14 days). <a href="#" onclick="showTerms()">Learn more</a></p>
+        </div>
+    </div>
+    <div class="popup signup-popup" id="signup-popup">
+        <button class="close-btn" onclick="closeSignup()">✖</button>
+        <h2>Sign Up</h2>
+        <form action="https://formspree.io/f/mldbddaq" method="POST" id="signup-form">
+            <input type="text" name="name" placeholder="Full Name" required>
+            <input type="email" name="email" placeholder="Email Address" required>
+            <input type="tel" name="phone" placeholder="Phone Number" required>
+            <input type="text" name="address" placeholder="Address" required>
+            <input type="text" name="pincode" placeholder="Pincode" required>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    <div class="popup terms-popup" id="terms-popup">
+        <button class="close-btn" onclick="closeTerms()">✖</button>
+        <h2>📜 Terms and Conditions</h2>
+        <div class="terms-content">
+            <p>Welcome to ANIRUDH ARTS GALLERY. By placing an order with us, you agree to the following terms and conditions:</p>
+            <h3>🖼️ Product Condition</h3>
+            <p>All artworks are handcrafted with care, using premium materials and artistic precision.</p>
+            <p>Each piece is unique and may carry natural textures or artistic effects due to the handmade process.</p>
+            <p>What you receive is a one-of-a-kind creation, tailored with attention and creativity.</p>
+            <h3>✅ Order Confirmation</h3>
+            <p>Orders with Cash on Delivery (COD) are confirmed only after an advance payment of ₹100.</p>
+            <p>This ₹100 will be adjusted in your total bill at the time of delivery.</p>
+            <h3>💸 COD Policy</h3>
+            <p>⚠️ Important: If the selected artwork or product becomes unavailable after COD confirmation, the ₹100 advance is non-refundable.</p>
+            <p>COD is a limited service, and ANIRUDH ARTS GALLERY reserves the right to cancel or decline COD orders based on availability.</p>
+            <p>Please make the ₹100 advance only after reading this carefully.</p>
+            <h3>💳 Online Payment</h3>
+            <p>No advance is needed for full online payments.</p>
+            <p>Online paid orders are prioritized for packaging and dispatch.</p>
+            <h3>🚚 Delivery</h3>
+            <p>Delivery time is usually 19 to 20 days, depending on your location and type of product ordered.</p>
+            <h3>🔁 Return & Refund Policy</h3>
+            <p>As each artwork is custom-made to your request, we do not offer returns or refunds.</p>
+            <p>Kindly review your order details carefully before confirming the purchase.</p>
+            <h3>🧍‍♂️ Customer Responsibility</h3>
+            <p>Ensure that your shipping details are accurate and that you're reachable for coordination.</p>
+            <p>Fraudulent claims or miscommunication may lead to cancellation or blocking of future orders.</p>
+            <h3>📩 Contact Us</h3>
+            <p>For any questions or issues, please contact us at:</p>
+            <p>Email: <a href="mailto:aearnigame@gmail.com">aearnigame@gmail.com</a></p>
+            <p>Phone/WhatsApp: <a href="tel:+919860730275">+91 9860730275</a></p>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <p>Owned by ANIRUDH KARAMUNGIKAR (ARTIST) © 2025 | <a href="#" onclick="showSignup()">Sign Up</a> | <a href="#" onclick="showTerms()">Terms and Conditions</a></p>
+</div>
+
+<script>
+    // Product List (Edit here)
+    const products = {
+        sketches: [
+            { id: 1, category: 'sketches', subcategory: 'basic', name: 'Basic Sketch', description: 'Artwork', price: 780, image: 'https://i.ibb.co/1xq5Dk6/update-imageeeee.jpg' },
+            { id: 2, category: 'sketches', subcategory: 'basic', name: 'A5 Portrait Sketch + Frame', description: 'Artwork', price: 1200, image: 'https://i.ibb.co/1xq5Dk6/update-imageeeee.jpg' },
+            { id: 3, category: 'sketches', subcategory: 'basic', name: 'A4 Portrait Sketch + Frame', description: 'Artwork', price: 1800, image: 'https://i.ibb.co/1xq5Dk6/update-imageeeee.jpg' },
+            { id: 4, category: 'sketches', subcategory: 'basic', name: 'A3 Portrait Sketch + Frame', description: 'Artwork', price: 2500, image: 'https://i.ibb.co/1xq5Dk6/update-imageeeee.jpg' },
+            { id: 5, category: 'sketches', subcategory: 'basic', name: 'A2 Portrait Sketch + Frame', description: 'Artwork', price: 3200, image: 'https://i.ibb.co/dw9cFTH5/Chhatrapati-Shivaji-Maharaj-charcoal-pencil-on-paper-Anirudh-Karamungikar.png' },
+            { id: 6, category: 'sketches', subcategory: 'detailed', name: 'A5 Detailed Portrait + Frame', description: 'Artwork', price: 1500, image: 'https://i.ibb.co/1xq5Dk6/update-imageeeee.jpg' },
+            { id: 7, category: 'sketches', subcategory: 'detailed', name: 'A4 Detailed Portrait + Frame', description: 'Artwork', price: 2200, image: 'https://i.ibb.co/1xq5Dk6/update-imageeeee.jpg' },
+            { id: 8, category: 'sketches', subcategory: 'detailed', name: 'A3 Detailed Portrait + Frame', description: 'Artwork', price: 3000, image: 'https://i.ibb.co/1xq5Dk6/update-imageeeee.jpg' },
+            { id: 9, category: 'sketches', subcategory: 'detailed', name: 'A2 Detailed Portrait + Frame', description: 'Artwork', price: 3800, image: 'https://i.ibb.co/dw9cFTH5/Chhatrapati-Shivaji-Maharaj-charcoal-pencil-on-paper-Anirudh-Karamungikar.png' },
+            { id: 10, category: 'sketches', subcategory: 'hyper-realistic', name: 'A5 Hyperrealistic Portrait + Frame', description: 'Artwork', price: 2000, image: 'https://i.ibb.co/1xq5Dk6/update-imageeeee.jpg' },
+            { id: 11, category: 'sketches', subcategory: 'hyper-realistic', name: 'A4 Hyperrealistic Portrait + Frame', description: 'Artwork', price: 2800, image: 'https://i.ibb.co/1xq5Dk6/update-imageeeee.jpg' },
+            { id: 12, category: 'sketches', subcategory: 'hyper-realistic', name: 'A3 Hyperrealistic Portrait + Frame', description: 'Artwork', price: 4000, image: 'https://i.ibb.co/1xq5Dk6/update-imageeeee.jpg' },
+            { id: 13, category: 'sketches', subcategory: 'hyper-realistic', name: 'A2 Hyperrealistic Portrait + Frame', description: 'Artwork', price: 4800, image: 'https://i.ibb.co/dw9cFTH5/Chhatrapati-Shivaji-Maharaj-charcoal-pencil-on-paper-Anirudh-Karamungikar.png' },
+        ],
+        paintings: [
+            { id: 14, category: 'paintings', subcategory: 'basic', name: 'A5 Watercolor Painting', description: 'Artwork', price: 1500, image: 'https://i.ibb.co/jXThzCb/lord-ram-by-Anirudh-Karamungikar.png' },
+            { id: 15, category: 'paintings', subcategory: 'basic', name: 'A4 Acrylic Painting', description: 'Artwork', price: 2500, image: 'https://i.ibb.co/RGM39GPG/adiyogi-shiva-by-Anirudh-Karamungikar.png' },
+            { id: 16, category: 'paintings', subcategory: 'basic', name: 'A3 Watercolor Painting', description: 'Artwork', price: 4000, image: 'https://i.ibb.co/jXThzCb/lord-ram-by-Anirudh-Karamungikar.png' },
+            { id: 17, category: 'paintings', subcategory: 'basic', name: 'A2 Acrylic Painting', description: 'Artwork', price: 6000, image: 'https://i.ibb.co/RGM39GPG/adiyogi-shiva-by-Anirudh-Karamungikar.png' },
+            { id: 18, category: 'paintings', subcategory: 'detailed', name: 'A5 Detailed Acrylic', description: 'Artwork', price: 3000, image: 'https://i.ibb.co/jXThzCb/lord-ram-by-Anirudh-Karamungikar.png' },
+            { id: 19, category: 'paintings', subcategory: 'detailed', name: 'A4 Detailed Acrylic', description: 'Artwork', price: 4500, image: 'https://i.ibb.co/RGM39GPG/adiyogi-shiva-by-Anirudh-Karamungikar.png' },
+            { id: 20, category: 'paintings', subcategory: 'detailed', name: 'A3 Detailed Acrylic', description: 'Artwork', price: 6500, image: 'https://i.ibb.co/jXThzCb/lord-ram-by-Anirudh-Karamungikar.png' },
+            { id: 21, category: 'paintings', subcategory: 'detailed', name: 'A2 Detailed Acrylic', description: 'Artwork', price: 8500, image: 'https://i.ibb.co/RGM39GPG/adiyogi-shiva-by-Anirudh-Karamungikar.png' },
+            { id: 22, category: 'paintings', subcategory: 'hyper-realistic', name: 'A5 Hyperrealistic Acrylic', description: 'Artwork', price: 5000, image: 'https://i.ibb.co/jXThzCb/lord-ram-by-Anirudh-Karamungikar.png' },
+            { id: 23, category: 'paintings', subcategory: 'hyper-realistic', name: 'A4 Hyperrealistic Acrylic', description: 'Artwork', price: 7500, image: 'https://i.ibb.co/RGM39GPG/adiyogi-shiva-by-Anirudh-Karamungikar.png' },
+            { id: 24, category: 'paintings', subcategory: 'hyper-realistic', name: 'A3 Hyperrealistic Acrylic', description: 'Artwork', price: 10000, image: 'https://i.ibb.co/jXThzCb/lord-ram-by-Anirudh-Karamungikar.png' },
+            { id: 25, category: 'paintings', subcategory: 'hyper-realistic', name: 'A2 Hyperrealistic Acrylic', description: 'Artwork', price: 12800, image: 'https://i.ibb.co/RGM39GPG/adiyogi-shiva-by-Anirudh-Karamungikar.png' },
+        ],
+        sculptures: [
+            ...Array.from({ length: 20 }, (_, i) => ({
+                id: 26 + i,
+                category: 'sculptures',
+                subcategory: 'basic',
+                name: `Artwork ${String(i + 1).padStart(2, '0')}`,
+                description: 'Artwork',
+                price: 2000 + i * 400,
+                image: `https://i.ibb.co/32TvGzP/mahadev-sclupture-by-anirudh.jpg${String(i + 1).padStart(2, '0')}`
+            })),
+        ],
+        customize: {
+            accessories: Array.from({ length: 30 }, (_, i) => ({
+                id: 46 + i,
+                category: 'customize',
+                subcategory: 'accessories',
+                name: `Custom Accessory ${String(i + 1).padStart(2, '0')}`,
+                description: 'Artwork',
+                price: 500 + i * 100,
+                image: `https://via.placeholder.com/300x200?text=Accessory+${String(i + 1).padStart(2, '0')}`
+            })),
+            shoes: Array.from({ length: 30 }, (_, i) => ({
+                id: 76 + i,
+                category: 'customize',
+                subcategory: 'shoes',
+                name: `Custom Shoes ${String(i + 1).padStart(2, '0')}`,
+                description: 'Artwork',
+                price: 1000 + i * 100,
+                image: `https://via.placeholder.com/300x200?text=Shoes+${String(i + 1).padStart(2, '0')}`
+            })),
+            shirts: Array.from({ length: 30 }, (_, i) => ({
+                id: 106 + i,
+                category: 'customize',
+                subcategory: 'shirts',
+                name: `Custom Shirt ${String(i + 1).padStart(2, '0')}`,
+                description: 'Artwork',
+                price: 800 + i * 100,
+                image: `https://via.placeholder.com/300x200?text=Shirt+${String(i + 1).padStart(2, '0')}`
+            })),
+            'phone-covers': Array.from({ length: 30 }, (_, i) => ({
+                id: 136 + i,
+                category: 'customize',
+                subcategory: 'phone-covers',
+                name: `Custom Phone Cover ${String(i + 1).padStart(2, '0')}`,
+                description: 'Artwork',
+                price: 600 + i * 100,
+                image: `https://via.placeholder.com/300x200?text=Phone+Cover+${String(i + 1).padStart(2, '0')}`
+            })),
+            skins: Array.from({ length: 30 }, (_, i) => ({
+                id: 166 + i,
+                category: 'customize',
+                subcategory: 'skins',
+                name: `Custom Skin ${String(i + 1).padStart(2, '0')}`,
+                description: 'Artwork',
+                price: 500 + i * 100,
+                image: `https://via.placeholder.com/300x200?text=Skin+${String(i + 1).padStart(2, '0')}`
+            })),
+            bags: Array.from({ length: 30 }, (_, i) => ({
+                id: 196 + i,
+                category: 'customize',
+                subcategory: 'bags',
+                name: `Custom Bag ${String(i + 1).padStart(2, '0')}`,
+                description: 'Artwork',
+                price: 1200 + i * 100,
+                image: `https://via.placeholder.com/300x200?text=Bag+${String(i + 1).padStart(2, '0')}`
+            })),
+            'kitchen-items': Array.from({ length: 30 }, (_, i) => ({
+                id: 226 + i,
+                category: 'customize',
+                subcategory: 'kitchen-items',
+                name: `Custom Kitchen Item ${String(i + 1).padStart(2, '0')}`,
+                description: 'Artwork',
+                price: 700 + i * 100,
+                image: `https://via.placeholder.com/300x200?text=Kitchen+Item+${String(i + 1).padStart(2, '0')}`
+            })),
+            'water-bottles': Array.from({ length: 30 }, (_, i) => ({
+                id: 256 + i,
+                category: 'customize',
+                subcategory: 'water-bottles',
+                name: `Custom Water Bottle ${String(i + 1).padStart(2, '0')}`,
+                description: 'Artwork',
+                price: 800 + i * 100,
+                image: `https://via.placeholder.com/300x200?text=Water+Bottle+${String(i + 1).padStart(2, '0')}`
+            })),
+        }
+    };
+
+    let selectedProduct = null;
+    let currentCategory = 'home';
+    let currentSubcategory = '';
+
+    const messages = [
+        "Art is not what you see, but what you make others see — Made with Anirudh Artist",
+        "Creativity is intelligence having fun, and art is its voice — Made with Anirudh Artist",
+        "Every brushstroke is a whisper from the soul — Made with Anirudh Artist"
+    ];
+
+    function rotateMessages() {
+        const messageElement = document.querySelector('.announcement .message');
+        let index = 0;
+        setInterval(() => {
+            messageElement.style.transform = 'translateX(-100%)';
+            setTimeout(() => {
+                messageElement.textContent = index < messages.length ? messages[index] : 'Free Shipping All Over India | Cash On Delivery';
+                messageElement.style.transform = 'translateX(0)';
+                index = (index + 1) % (messages.length + 1);
+            }, 500);
+        }, 7000);
+    }
+
+    const names = ['Shubhra', 'Anirudh', 'Sakshi', 'Arni', 'Bhagyashree', 'Sangam', 'Supriya', 'Balaji', 'Pallavi', 'Avani', 'Arnav', 'Sanu', 'Gargi'];
+    const places = ['Mumbai', 'Pune', 'Bangalore', 'Delhi', 'Latur', 'Nanded', 'Ahmedpur'];
+    const productsList = ['A4 Acrylic Painting', 'A5 Watercolor Painting', 'A3 Detailed Acrylic', 'A2 Portrait Sketch', 'Custom Phone Cover', 'Basic Sketch'];
+
+    function showFakePopup() {
+        const popup = document.createElement('div');
+        popup.classList.add('fake-popup');
+        const name = names[Math.floor(Math.random() * names.length)];
+        const place = places[Math.floor(Math.random() * places.length)];
+        const product = productsList[Math.floor(Math.random() * productsList.length)];
+        popup.textContent = `${name} just bought ${product} near ${place}!`;
+        document.body.appendChild(popup);
+        setTimeout(() => {
+            popup.remove();
+        }, 8000);
+    }
+
+    function getRandomProducts(array, count) {
+        const shuffled = [...array].sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, count);
+    }
+
+    function renderProducts(productList, containerId) {
+        const productsContainer = document.getElementById(containerId);
+        productsContainer.innerHTML = '';
+        productList.forEach(product => {
+            const productElement = document.createElement('div');
+            productElement.classList.add('product');
+            productElement.innerHTML = `
+                <img src="${product.image}" alt="${product.name}">
+                <div class="product-info">
+                    <h3>${product.name}</h3>
+                    <p class="description">${product.description}</p>
+                    <p class="price">₹${product.price.toFixed(2)}</p>
+                    <button onclick="showCheckout(${product.id})">Buy Now</button>
+                </div>
+            `;
+            productsContainer.appendChild(productElement);
+        });
+    }
+
+    function renderHomeProducts() {
+        const homeProducts = [
+            ...getRandomProducts(products.sketches, 4),
+            ...getRandomProducts(products.paintings, 4),
+            ...getRandomProducts(products.sculptures, 4),
+            ...getRandomProducts(Object.values(products.customize).flat(), 4)
+        ];
+        renderProducts(homeProducts, 'home-products');
+    }
+
+    function showCategory(category, event) {
+        if (event) event.preventDefault();
+        currentCategory = category;
+        currentSubcategory = '';
+        const homeContent = document.getElementById('home-content');
+        const productsContainer = document.getElementById('products');
+        if (category === 'home') {
+            homeContent.style.display = 'block';
+            productsContainer.style.display = 'none';
+            renderHomeProducts();
+        } else if (category === 'customize') {
+            homeContent.style.display = 'none';
+            productsContainer.style.display = 'none';
+        } else {
+            homeContent.style.display = 'none';
+            productsContainer.style.display = 'grid';
+            renderProducts(products[category], 'products');
+        }
+        showFakePopup();
+    }
+
+    function showSubcategory(subcategory, event) {
+        if (event) event.preventDefault();
+        currentCategory = 'customize';
+        currentSubcategory = subcategory;
+        const homeContent = document.getElementById('home-content');
+        const productsContainer = document.getElementById('products');
+        homeContent.style.display = 'none';
+        productsContainer.style.display = 'grid';
+        renderProducts(products.customize[subcategory], 'products');
+        showFakePopup();
+    }
+
+    function searchProducts() {
+        const query = document.getElementById('search-input').value.toLowerCase();
+        let filteredProducts = [];
+        if (currentCategory === 'home') {
+            filteredProducts = [
+                ...products.sketches,
+                ...products.paintings,
+                ...products.sculptures,
+                ...Object.values(products.customize).flat()
+            ];
+        } else if (currentCategory === 'customize') {
+            filteredProducts = products.customize[currentSubcategory] || [];
+        } else {
+            filteredProducts = products[currentCategory];
+        }
+        filteredProducts = filteredProducts.filter(product =>
+            product.name.toLowerCase().includes(query) ||
+            product.description.toLowerCase().includes(query)
+        );
+        renderProducts(filteredProducts, 'products');
+    }
+
+    function showCheckout(productId) {
+        const allProducts = [
+            ...products.sketches,
+            ...products.paintings,
+            ...products.sculptures,
+            ...Object.values(products.customize).flat()
+        ];
+        selectedProduct = allProducts.find(p => p.id === productId);
+        const checkoutPopup = document.getElementById('checkout-popup');
+        const blurOverlay = document.getElementById('blur-overlay');
+        const checkoutItem = document.getElementById('checkout-item');
+        checkoutItem.innerHTML = `Selected: ${selectedProduct.name} - ₹${selectedProduct.price.toFixed(2)}`;
+        checkoutPopup.classList.add('active');
+        blurOverlay.classList.add('active');
+    }
+
+    function closeCheckout() {
+        const checkoutPopup = document.getElementById('checkout-popup');
+        const blurOverlay = document.getElementById('blur-overlay');
+        checkoutPopup.classList.remove('active');
+        blurOverlay.classList.remove('active');
+    }
+
+    function showSignup() {
+        const signupPopup = document.getElementById('signup-popup');
+        const blurOverlay = document.getElementById('blur-overlay');
+        signupPopup.classList.add('active');
+        blurOverlay.classList.add('active');
+    }
+
+    function closeSignup() {
+        const signupPopup = document.getElementById('signup-popup');
+        const blurOverlay = document.getElementById('blur-overlay');
+        signupPopup.classList.remove('active');
+        blurOverlay.classList.remove('active');
+    }
+
+    function showTerms() {
+        const termsPopup = document.getElementById('terms-popup');
+        const blurOverlay = document.getElementById('blur-overlay');
+        termsPopup.classList.add('active');
+        blurOverlay.classList.add('active');
+    }
+
+    function closeTerms() {
+        const termsPopup = document.getElementById('terms-popup');
+        const blurOverlay = document.getElementById('blur-overlay');
+        termsPopup.classList.remove('active');
+        blurOverlay.classList.remove('active');
+    }
+
+    function showCart(event) {
+        event.preventDefault();
+        alert('S18! missing you sq...🥺');
+    }
+
+    // Auto-save form data
+    const signupForm = document.getElementById('signup-form');
+    if (signupForm) {
+        signupForm.addEventListener('input', () => {
+            const formData = new FormData(signupForm);
+            const data = {};
+            formData.forEach((value, key) => { data[key] = value; });
+            localStorage.setItem('signupFormData', JSON.stringify(data));
+        });
+
+        // Load saved data
+        const savedData = localStorage.getItem('signupFormData');
+        if (savedData) {
+            const data = JSON.parse(savedData);
+            for (const [key, value] of Object.entries(data)) {
+                const input = signupForm.querySelector(`[name="${key}"]`);
+                if (input) input.value = value;
+            }
+        }
+    }
+
+    // Initialize the page
+    showCategory('home');
+    rotateMessages();
+    setInterval(showFakePopup, 10000);
+
+    // Close popups on overlay click
+    document.getElementById('blur-overlay').addEventListener('click', () => {
+        closeCheckout();
+        closeSignup();
+        closeTerms();
+    });
+</script>
+</body>
+</html>
+
+
+
+
+Impact-Site-Verification: 603b2108-0084-4b07-8081-b58143b7815f
+
+
